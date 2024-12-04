@@ -24,6 +24,7 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     // variables that depend on sample rate or block size
 
     gain = std::make_unique<Gain>(float(sampleRate), samplesPerBlock, getTotalNumOutputChannels(), PARAMETER_DEFAULTS[PARAM::GAIN] / 100.0f);
+
 }
 
 void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,

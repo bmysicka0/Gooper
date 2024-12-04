@@ -1,12 +1,12 @@
 # Example Plugin CMAKE file
 # Nathan Blair May 2023 - modified from the example CMAKE file from JUCE
 
-set(ENV{PLUGIN_NAME} EXAMPLE)
+set(ENV{PLUGIN_NAME} Gooper)
 set(ENV{VERSION_NUMBER} 0x000001) # 0xVVMMPP (VV = version, MM = modification, PP = patch)
-set(ENV{VERSION_STRING} 0.0.1) # VV.MM.PP
-set(ENV{COMPANY_NAME} YOUR_COMPANY_NAME)
-set(ENV{MANUFACTURER_ID} MFID) # A four-character manufacturer id with at least one upper-case character
-set(ENV{PLUGIN_CODE} Plid) # A unique four-character plugin id with exactly one upper-case character
+set(ENV{VERSION_STRING} 3.30.5) # VV.MM.PP
+set(ENV{COMPANY_NAME} brand0)
+set(ENV{MANUFACTURER_ID} B000) # A four-character manufacturer id with at least one upper-case character
+set(ENV{PLUGIN_CODE} BRAN) # A unique four-character plugin id with exactly one upper-case character
 
 
 #--------------------------------------------------------------------------------

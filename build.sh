@@ -1,9 +1,9 @@
 #!/bin/bash
 
-python src/parameters/create_parameters.py
+python3 src/parameters/create_parameters.py
 
-PLUGIN_NAME="EXAMPLE"
-MODE="RelWithDebInfo"
+PLUGIN_NAME="Gooper"
+MODE="Debug"
 
 if ! [ -d "build" ]; then
   `mkdir -p build`
@@ -15,7 +15,7 @@ cd build
 if [ $Architecture = 'x86_64' ]; then
   cmake -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_BUILD_TYPE="$MODE" ..
 elif [ $Architecture = 'arm64' ]; then
-  cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_BUILD_TYPE="$MODE" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.10 ..
+  cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_BUILD_TYPE="$MODE" -DCMAKE_OSX_DEPLOYMENT_TARGET=12.6 ..
 fi
 
 cd ..
@@ -32,6 +32,8 @@ if [ ${result} == 0 ]; then
   # build/"$PLUGIN_NAME"_artefacts/"$MODE"/Standalone/"$PLUGIN_NAME".app/Contents/MacOS/"$PLUGIN_NAME"
   # lldb /Applications/REAPER.app/Contents/MacOS/REAPER peripheral/Test.rpp
   # /Applications/Ableton\ Live\ 11\ Suite.app/Contents/MacOS/Live peripheral/Test\ Project/Test.als
+    open "/Users/brand0/Documents/Ableton Projects/Max4Live/gooper tesst Project/gooper tesst.als"
+
 
 else
   say "Build failed"

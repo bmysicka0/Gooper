@@ -49,8 +49,16 @@ private:
     // which is owned by the processor
     StateManager* state;
 
-    // A single slider
+    // sliders
     std::unique_ptr<ParameterSlider> gain_slider;
+    std::unique_ptr<ParameterSlider> goops_slider;
+    std::unique_ptr<ParameterSlider> feed_slider;
+    std::unique_ptr<ParameterSlider> rate_slider;
+    std::unique_ptr<ParameterSlider> spread_slider;
+    std::unique_ptr<ParameterSlider> stereo_slider;
+    std::unique_ptr<ParameterSlider> shepard_slider;
+    std::unique_ptr<ParameterSlider> goopage_slider;
+    std::unique_ptr<ParameterSlider> drywet_slider;
 
     //==============================================================================
     // UNDO REDO
