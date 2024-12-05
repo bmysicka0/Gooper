@@ -25,10 +25,32 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
     gain = std::make_unique<Gain>(float(sampleRate), samplesPerBlock, getTotalNumOutputChannels(), PARAMETER_DEFAULTS[PARAM::GAIN] / 100.0f);
 
+    // Store sample rate
+    currentSampleRate = sampleRate;
+
+    // Prepare the delay buffer for the flanger
+    delayBufferSize = (int)(maxDelayTime * currentSampleRate) + 1;
+    delayBuffer.setSize(getTotalNumOutputChannels(), delayBufferSize);
+    delayBuffer.clear();
+    writePosition = 0;
+
+    // Set initial flanger parameters
+    flangerRate = 0.2f;     // base rate
+    flangerDepth = 0.5f;
+    flangerFeedback = 0.3f;
+    flangerMix = 0.5f;
+
+    // Set up slightly different rates for L/R channels
+    flangerRateLeft = flangerRate;       // Left channel LFO rate
+    flangerRateRight = flangerRate * 1.02f; // Right channel slightly faster LFO
+
+    // Reset LFO phases
+    lfoPhaseLeft = 0.0f;
+    lfoPhaseRight = 0.0f;
+
 }
 
-void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
-                                              juce::MidiBuffer& midiMessages)
+void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
 
@@ -38,6 +60,82 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // so we normalize it to 0 to 1
     //--------------------------------------------------------------------------------
     auto requested_gain = state->param_value(PARAM::GAIN) / 100.0f;
+
+    int totalNumInputChannels  = getTotalNumInputChannels();
+    int totalNumOutputChannels = getTotalNumOutputChannels();
+    int numSamples = buffer.getNumSamples();
+
+    // Clear any unused output channels
+    for (int ch = totalNumInputChannels; ch < totalNumOutputChannels; ++ch)
+        buffer.clear(ch, 0, numSamples);
+
+    float requestedGain = state->param_value(PARAM::GAIN) / 100.0f;
+    gain->setGain(requestedGain);
+
+    // Calculate LFO increments for left and right channels
+    float lfoIncrementLeft  = (float)(2.0 * juce::MathConstants<double>::pi * flangerRateLeft / currentSampleRate);
+    float lfoIncrementRight = (float)(2.0 * juce::MathConstants<double>::pi * flangerRateRight / currentSampleRate);
+
+    for (int sample = 0; sample < numSamples; ++sample)
+    {
+        // Advance and wrap LFO phases for left and right
+        float lfoValueLeft = 0.5f * (1.0f + std::sin(lfoPhaseLeft));
+        lfoPhaseLeft += lfoIncrementLeft;
+        if (lfoPhaseLeft >= juce::MathConstants<float>::twoPi)
+            lfoPhaseLeft -= juce::MathConstants<float>::twoPi;
+
+        float lfoValueRight = 0.5f * (1.0f + std::sin(lfoPhaseRight));
+        lfoPhaseRight += lfoIncrementRight;
+        if (lfoPhaseRight >= juce::MathConstants<float>::twoPi)
+            lfoPhaseRight -= juce::MathConstants<float>::twoPi;
+
+        // Current delay times for left and right
+        float currentDelayTimeLeft = maxDelayTime * flangerDepth * lfoValueLeft;
+        float currentDelayTimeRight = maxDelayTime * flangerDepth * lfoValueRight;
+
+        int delaySamplesLeft = (int)(currentDelayTimeLeft * currentSampleRate);
+        int delaySamplesRight = (int)(currentDelayTimeRight * currentSampleRate);
+
+        // Process left channel if present
+        if (totalNumOutputChannels > 0)
+        {
+            float* channelData = buffer.getWritePointer(0);
+            float* delayData = delayBuffer.getWritePointer(0);
+
+            int readPositionLeft = writePosition - delaySamplesLeft;
+            if (readPositionLeft < 0)
+                readPositionLeft += delayBufferSize;
+
+            float delayedSampleLeft = delayData[readPositionLeft];
+            float inputSampleLeft = channelData[sample];
+            delayData[writePosition] = inputSampleLeft + (delayedSampleLeft * flangerFeedback);
+
+            float wetSampleLeft = (inputSampleLeft * (1.0f - flangerMix)) + (delayedSampleLeft * flangerMix);
+            channelData[sample] = wetSampleLeft;
+        }
+
+        // Process right channel if present
+        if (totalNumOutputChannels > 1)
+        {
+            float* channelData = buffer.getWritePointer(1);
+            float* delayData = delayBuffer.getWritePointer(1);
+
+            int readPositionRight = writePosition - delaySamplesRight;
+            if (readPositionRight < 0)
+                readPositionRight += delayBufferSize;
+
+            float delayedSampleRight = delayData[readPositionRight];
+            float inputSampleRight = channelData[sample];
+            delayData[writePosition] = inputSampleRight + (delayedSampleRight * flangerFeedback);
+
+            float wetSampleRight = (inputSampleRight * (1.0f - flangerMix)) + (delayedSampleRight * flangerMix);
+            channelData[sample] = wetSampleRight;
+        }
+
+        // Increment write position and wrap around
+        writePosition = (writePosition + 1) % delayBufferSize;
+
+    }
 
     //--------------------------------------------------------------------------------
     // process samples below. use the buffer argument that is passed in.
