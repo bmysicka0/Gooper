@@ -97,6 +97,7 @@ target_sources($ENV{PLUGIN_NAME}
         src/parameters/StateManager.cpp
         src/interface/ParameterSlider.cpp
         src/audio/Gain.cpp
+        src/audio/Flanger.cpp
         )
 
 #--------------------------------------------------------------------------------

@@ -1,9 +1,8 @@
-// Nathan Blair June 2023
-
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "../parameters/StateManager.h"
 #include "../audio/Gain.h"
+#include "../audio/Flanger.h"
 
 //==============================================================================
 PluginProcessor::PluginProcessor()
@@ -19,34 +18,25 @@ PluginProcessor::~PluginProcessor()
 //==============================================================================
 void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Called after the constructor, but before playback starts
-    // Use this to allocate up any resources you need, and to reset any
-    // variables that depend on sample rate or block size
+    // gain = std::make_unique<Gain>(static_cast<float>(sampleRate), samplesPerBlock, getTotalNumOutputChannels(), PARAMETER_DEFAULTS[PARAM::GAIN] / 100.0f);
 
-    gain = std::make_unique<Gain>(float(sampleRate), samplesPerBlock, getTotalNumOutputChannels(), PARAMETER_DEFAULTS[PARAM::GAIN] / 100.0f);
+    flanger1.setParameters(PARAMETER_DEFAULTS[PARAM::RATE], PARAMETER_DEFAULTS[PARAM::FEED], static_cast<bool>(PARAMETER_DEFAULTS[PARAM::STEREO]), 20.0f, 20000.0f);
+    flanger1.prepare(sampleRate, getTotalNumOutputChannels());
 
-    // Store sample rate
-    currentSampleRate = sampleRate;
+    flanger2.setParameters(PARAMETER_DEFAULTS[PARAM::RATE] + PARAMETER_DEFAULTS[PARAM::SPREAD], 0.0f, false, 20.0f, 20000.0f);
+    flanger2.prepare(sampleRate, getTotalNumOutputChannels());
 
-    // Prepare the delay buffer for the flanger
-    delayBufferSize = (int)(maxDelayTime * currentSampleRate) + 1;
-    delayBuffer.setSize(getTotalNumOutputChannels(), delayBufferSize);
-    delayBuffer.clear();
-    writePosition = 0;
+    flanger3.setParameters(PARAMETER_DEFAULTS[PARAM::RATE] + PARAMETER_DEFAULTS[PARAM::SPREAD] * 2, 0.0f, false, 20.0f, 20000.0f);
+    flanger3.prepare(sampleRate, getTotalNumOutputChannels());
 
-    // Set initial flanger parameters
-    flangerRate = 0.2f;     // base rate
-    flangerDepth = 0.5f;
-    flangerFeedback = 0.3f;
-    flangerMix = 0.5f;
+    flanger4.setParameters(PARAMETER_DEFAULTS[PARAM::RATE] + PARAMETER_DEFAULTS[PARAM::SPREAD] * 3, PARAMETER_DEFAULTS[PARAM::FEED], static_cast<bool>(PARAMETER_DEFAULTS[PARAM::STEREO]), 20.0f, 20000.0f);
+    flanger4.prepare(sampleRate, getTotalNumOutputChannels());
 
-    // Set up slightly different rates for L/R channels
-    flangerRateLeft = flangerRate;       // Left channel LFO rate
-    flangerRateRight = flangerRate * 1.02f; // Right channel slightly faster LFO
+    flanger5.setParameters(PARAMETER_DEFAULTS[PARAM::RATE] + PARAMETER_DEFAULTS[PARAM::SPREAD] * 4, 0.0f, false, 20.0f, 20000.0f);
+    flanger5.prepare(sampleRate, getTotalNumOutputChannels());
 
-    // Reset LFO phases
-    lfoPhaseLeft = 0.0f;
-    lfoPhaseRight = 0.0f;
+    flanger6.setParameters(PARAMETER_DEFAULTS[PARAM::RATE] + PARAMETER_DEFAULTS[PARAM::SPREAD] * 4, 0.0f, false, 20.0f, 20000.0f);
+    flanger6.prepare(sampleRate, getTotalNumOutputChannels());
 
 }
 
@@ -54,102 +44,45 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
 {
     juce::ScopedNoDenormals noDenormals;
 
-    //--------------------------------------------------------------------------------
-    // read in some parameter values here, if you want
-    // in this case, gain goes from 0 to 100 (see: ../parameters/parameters.csv)
-    // so we normalize it to 0 to 1
-    //--------------------------------------------------------------------------------
-    auto requested_gain = state->param_value(PARAM::GAIN) / 100.0f;
-
     int totalNumInputChannels  = getTotalNumInputChannels();
     int totalNumOutputChannels = getTotalNumOutputChannels();
     int numSamples = buffer.getNumSamples();
 
-    // Clear any unused output channels
+    // Clear extra channels if any
     for (int ch = totalNumInputChannels; ch < totalNumOutputChannels; ++ch)
         buffer.clear(ch, 0, numSamples);
 
-    float requestedGain = state->param_value(PARAM::GAIN) / 100.0f;
-    gain->setGain(requestedGain);
+    // Retrieve requested gain
+    // float requestedGain = state->param_value(GAIN) / 100.0f;
+    // gain->setGain(requestedGain);
 
-    // Calculate LFO increments for left and right channels
-    float lfoIncrementLeft  = (float)(2.0 * juce::MathConstants<double>::pi * flangerRateLeft / currentSampleRate);
-    float lfoIncrementRight = (float)(2.0 * juce::MathConstants<double>::pi * flangerRateRight / currentSampleRate);
+    // Retrieve parameter values from state
+    float rate = state->param_value(RATE);
+    float feed = state->param_value(FEED);
+    bool stereo = state->param_value(STEREO);
+    float spread = state->param_value(SPREAD);
+    float goops = state->param_value(GOOPS);
 
-    for (int sample = 0; sample < numSamples; ++sample)
-    {
-        // Advance and wrap LFO phases for left and right
-        float lfoValueLeft = 0.5f * (1.0f + std::sin(lfoPhaseLeft));
-        lfoPhaseLeft += lfoIncrementLeft;
-        if (lfoPhaseLeft >= juce::MathConstants<float>::twoPi)
-            lfoPhaseLeft -= juce::MathConstants<float>::twoPi;
+    DBG("Rate: " << rate << ", Spread: " << spread << ", Feedback: " << feed << ", Stereo: " << int(stereo));
 
-        float lfoValueRight = 0.5f * (1.0f + std::sin(lfoPhaseRight));
-        lfoPhaseRight += lfoIncrementRight;
-        if (lfoPhaseRight >= juce::MathConstants<float>::twoPi)
-            lfoPhaseRight -= juce::MathConstants<float>::twoPi;
+    flanger1.setParameters(rate, feed, stereo, 20.0f, 20000.0f);
+    flanger2.setParameters(rate + spread, 0.0f, false, 20.0f, 20000.0f);
+    flanger3.setParameters(rate + 2.0f * spread, 0.0f, false, 20.0f, 20000.0f);
+    flanger4.setParameters(rate + 3.0f * spread, feed, stereo, 20.0f, 20000.0f);
+    flanger5.setParameters(rate + 4.0f * spread, 0.0f, false, 20.0f, 20000.0f);
+    flanger6.setParameters(rate + 5.0f * spread, 0.0f, false, 20.0f, 20000.0f);
 
-        // Current delay times for left and right
-        float currentDelayTimeLeft = maxDelayTime * flangerDepth * lfoValueLeft;
-        float currentDelayTimeRight = maxDelayTime * flangerDepth * lfoValueRight;
+    // Now process through flangers with updated parameters
+    if (goops >= 1) flanger1.process(buffer);
+    if (goops >= 2) flanger2.process(buffer);
+    if (goops >= 3) flanger3.process(buffer);
+    if (goops >= 4) flanger4.process(buffer);
+    if (goops >= 5) flanger5.process(buffer);
 
-        int delaySamplesLeft = (int)(currentDelayTimeLeft * currentSampleRate);
-        int delaySamplesRight = (int)(currentDelayTimeRight * currentSampleRate);
+    // Now apply gain after all flanging
+    // gain->process(buffer);
 
-        // Process left channel if present
-        if (totalNumOutputChannels > 0)
-        {
-            float* channelData = buffer.getWritePointer(0);
-            float* delayData = delayBuffer.getWritePointer(0);
-
-            int readPositionLeft = writePosition - delaySamplesLeft;
-            if (readPositionLeft < 0)
-                readPositionLeft += delayBufferSize;
-
-            float delayedSampleLeft = delayData[readPositionLeft];
-            float inputSampleLeft = channelData[sample];
-            delayData[writePosition] = inputSampleLeft + (delayedSampleLeft * flangerFeedback);
-
-            float wetSampleLeft = (inputSampleLeft * (1.0f - flangerMix)) + (delayedSampleLeft * flangerMix);
-            channelData[sample] = wetSampleLeft;
-        }
-
-        // Process right channel if present
-        if (totalNumOutputChannels > 1)
-        {
-            float* channelData = buffer.getWritePointer(1);
-            float* delayData = delayBuffer.getWritePointer(1);
-
-            int readPositionRight = writePosition - delaySamplesRight;
-            if (readPositionRight < 0)
-                readPositionRight += delayBufferSize;
-
-            float delayedSampleRight = delayData[readPositionRight];
-            float inputSampleRight = channelData[sample];
-            delayData[writePosition] = inputSampleRight + (delayedSampleRight * flangerFeedback);
-
-            float wetSampleRight = (inputSampleRight * (1.0f - flangerMix)) + (delayedSampleRight * flangerMix);
-            channelData[sample] = wetSampleRight;
-        }
-
-        // Increment write position and wrap around
-        writePosition = (writePosition + 1) % delayBufferSize;
-
-    }
-
-    //--------------------------------------------------------------------------------
-    // process samples below. use the buffer argument that is passed in.
-    // for an audio effect, buffer is filled with input samples, and you should fill it with output samples
-    // for a synth, buffer is filled with zeros, and you should fill it with output samples
-    // see: https://docs.juce.com/master/classAudioBuffer.html
-    //--------------------------------------------------------------------------------
-    
-    gain->setGain(requested_gain);
-    gain->process(buffer);
-    //--------------------------------------------------------------------------------
-    // you can use midiMessages to read midi if you need. 
-    // since we are not using midi yet, we clear the buffer.
-    //--------------------------------------------------------------------------------
+    // Clear MIDI if not used
     midiMessages.clear();
 }
 

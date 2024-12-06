@@ -1,11 +1,10 @@
-// Nathan Blair June 2023
-
 #pragma once
 
 class StateManager;
 class Gain;
 
 #include <juce_audio_basics/juce_audio_basics.h>
+#include "../audio/Flanger.h"
 
 #include "PluginProcessorBase.h"
 
@@ -33,24 +32,13 @@ public:
 
     std::unique_ptr<Gain> gain;
 
-    // Flanger parameters
-    double currentSampleRate = 0.0;
-    float flangerRate = 0.2f;       // base LFO rate in Hz
-    float flangerDepth = 0.5f;      // fraction of maxDelayTime used
-    float flangerFeedback = 0.3f;   // feedback amount
-    float flangerMix = 0.5f;        // wet/dry balance
-
-    float lfoPhaseLeft = 0.0f;
-    float lfoPhaseRight = 0.0f;
-
-    float flangerRateLeft = 0.2f;
-    float flangerRateRight = 0.204f; // slightly different rate for the right channel
-
-    float maxDelayTime = 0.01f;     // max delay time in seconds (10ms)
-
-    int delayBufferSize = 0;
-    int writePosition = 0;
-    juce::AudioBuffer<float> delayBuffer;
+    // One or more flangers in series
+    Flanger flanger1;
+    Flanger flanger2;
+    Flanger flanger3;
+    Flanger flanger4;
+    Flanger flanger5;
+    Flanger flanger6;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)

@@ -29,7 +29,7 @@ if [ ${result} == 0 ]; then
 
   # CHANGE THIS LINE TO OPEN A ... DAW, or a debugger if you want
 
-  # build/"$PLUGIN_NAME"_artefacts/"$MODE"/Standalone/"$PLUGIN_NAME".app/Contents/MacOS/"$PLUGIN_NAME"
+#   build/"$PLUGIN_NAME"_artefacts/"$MODE"/Standalone/"$PLUGIN_NAME".app/Contents/MacOS/"$PLUGIN_NAME"
   # lldb /Applications/REAPER.app/Contents/MacOS/REAPER peripheral/Test.rpp
   # /Applications/Ableton\ Live\ 11\ Suite.app/Contents/MacOS/Live peripheral/Test\ Project/Test.als
     open "/Users/brand0/Documents/Ableton Projects/Max4Live/gooper tesst Project/gooper tesst.als"
