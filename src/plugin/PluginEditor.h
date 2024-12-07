@@ -50,7 +50,6 @@ private:
     StateManager* state;
 
     // sliders
-    std::unique_ptr<ParameterSlider> gain_slider;
     std::unique_ptr<ParameterSlider> goops_slider;
     std::unique_ptr<ParameterSlider> feed_slider;
     std::unique_ptr<ParameterSlider> rate_slider;

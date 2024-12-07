@@ -14,12 +14,12 @@ Gain::~Gain() {
 
 void Gain::process(juce::AudioBuffer<float>& buffer) {
     float target_gain = gain * (1.0f - iir_gamma) + requested_gain * iir_gamma;
-    if (std::abs(target_gain - requested_gain) < 0.001f) 
+    if (std::abs(target_gain - requested_gain) < 0.001f)
         target_gain = requested_gain;
     buffer.applyGainRamp(0, buffer.getNumSamples(), gain, target_gain);
     gain = target_gain;
 }
 
-void Gain::setGain(float requested_gain_) {
-    requested_gain = requested_gain_;
-}
+// void Gain::setGain(float requested_gain_) {
+//     requested_gain = requested_gain_;
+// }

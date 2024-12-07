@@ -1,6 +1,5 @@
 PARAMETER, MIN, MAX, GRAIN, EXP, DEFAULT, AUTOMATABLE, NAME, SUFFIX, TOOLTIP, TO_STRING_ARR
-GAIN, 0, 100, 1, 1, 50, 1, Gain, %, Gain Parameter, ,
-GOOPS, 1, 6, 1, 1, 1, 1, Goops, , Goops Parameter, ,
+GOOPS, 0, 6, 1, 1, 0, 1, Goops, , Goops Parameter, ,
 FEED, -0.95, 0.95, 0.01, 1, 0, 1, Feed, , Feed Parameter, ,
 RATE, 0.01, 1, 0.01, 0.4, 0.01, 1, Rate, Hz, Rate Parameter, ,
 SPREAD, 0, 0.5, 0.01, 0.75, 0, 1, Spread, Hz, Spread Parameter, ,

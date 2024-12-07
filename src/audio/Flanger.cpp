@@ -8,10 +8,13 @@ void Flanger::setParameters(float newRate, float newFeedback, bool stereo, float
 {
     flangerRate = newRate;
     flangerFeedback = newFeedback;
-    stereoMode = stereo;
     minFreq = minFrequency;
     maxFreq = maxFrequency;
     maxDelayTime = 1.0f / minFreq;
+
+    // Check if stereo mode is toggled
+    bool stereoModeChanged = (stereoMode != stereo);
+    stereoMode = stereo;
 
     flangerRateLeft = flangerRate;
 
@@ -19,6 +22,13 @@ void Flanger::setParameters(float newRate, float newFeedback, bool stereo, float
         flangerRateRight = flangerRate * 1.02f;
     else
         flangerRateRight = flangerRate;
+
+    // Resync LFO phases if stereo mode is toggled
+    if (stereoModeChanged)
+    {
+        lfoPhaseLeft = 0.0f;
+        lfoPhaseRight = 0.0f;
+    }
 }
 
 void Flanger::prepare(double sampleRate, int channels)
@@ -26,7 +36,7 @@ void Flanger::prepare(double sampleRate, int channels)
     currentSampleRate = sampleRate;
     totalNumChannels = channels;
 
-    delayBufferSize = (int)(maxDelayTime * currentSampleRate) + 1;
+    delayBufferSize = static_cast<int>(maxDelayTime * currentSampleRate) + 1;
     delayBuffer.setSize(totalNumChannels, delayBufferSize);
     delayBuffer.clear();
     writePosition = 0;
@@ -40,10 +50,8 @@ void Flanger::process(juce::AudioBuffer<float>& buffer)
     int numSamples = buffer.getNumSamples();
     int totalNumOutputChannels = totalNumChannels;
 
-    DBG("flangerRateRight: " << flangerRateRight << ", flangerRateLeft: " << flangerRateLeft );
-
-    float lfoIncrementLeft  = (float)(2.0 * juce::MathConstants<double>::pi * flangerRateLeft / currentSampleRate);
-    float lfoIncrementRight = (float)(2.0 * juce::MathConstants<double>::pi * flangerRateRight / currentSampleRate);
+    float lfoIncrementLeft = (2.0f * juce::MathConstants<double>::pi * flangerRateLeft) / currentSampleRate;
+    float lfoIncrementRight = (2.0f * juce::MathConstants<double>::pi * flangerRateRight) / currentSampleRate;
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
@@ -66,8 +74,8 @@ void Flanger::process(juce::AudioBuffer<float>& buffer)
         float currentDelayTimeLeft = 1.0f / freqLeft;
         float currentDelayTimeRight = 1.0f / freqRight;
 
-        int delaySamplesLeft = (int)(currentDelayTimeLeft * currentSampleRate);
-        int delaySamplesRight = (int)(currentDelayTimeRight * currentSampleRate);
+        int delaySamplesLeft = static_cast<int>(currentDelayTimeLeft * currentSampleRate);
+        int delaySamplesRight = static_cast<int>(currentDelayTimeRight * currentSampleRate);
 
         // Process left channel
         if (totalNumOutputChannels > 0)

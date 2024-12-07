@@ -15,9 +15,6 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (PluginProcesso
     undo_manager = state->get_undo_manager();
 
     // add slider BEFORE setting size
-    gain_slider = std::make_unique<ParameterSlider>(state, PARAM::GAIN);
-    addAndMakeVisible(*gain_slider);
-
     goops_slider = std::make_unique<ParameterSlider>(state, PARAM::GOOPS);
     addAndMakeVisible(*goops_slider);
 
@@ -72,12 +69,11 @@ void AudioPluginAudioProcessorEditor::resized()
 {
     // set the position of your components here
     int slider_size = proportionOfWidth(0.1f);
-    int slider_x = proportionOfWidth(0.1f) - (slider_size / 2);
+    int slider_x = proportionOfWidth(0.15f) - (slider_size / 2);
     int slider_y = proportionOfHeight(0.5f) - (slider_size / 2);
-    gain_slider->setBounds(slider_x, slider_y, slider_size, slider_size);
 
-    int goops_slider_x = slider_x + slider_size;
-    goops_slider->setBounds(goops_slider_x, slider_y, slider_size, slider_size);
+    int goops_slider_x = slider_x;
+    goops_slider->setBounds(slider_x, slider_y, slider_size, slider_size);
 
     int feed_slider_x = goops_slider_x + slider_size;
     feed_slider->setBounds(feed_slider_x, slider_y, slider_size, slider_size);
@@ -104,9 +100,6 @@ void AudioPluginAudioProcessorEditor::resized()
 void AudioPluginAudioProcessorEditor::timerCallback() {
     // repaint UI and note that we have updated ui, if parameter values have changed
     if (state->any_parameter_changed.exchange(false)) {
-        if (state->get_parameter_modified(PARAM::GAIN)) {
-            gain_slider->repaint();
-        }
         if (state->get_parameter_modified(PARAM::GOOPS)) {
             goops_slider->repaint();
         }

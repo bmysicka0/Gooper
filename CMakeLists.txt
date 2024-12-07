@@ -98,6 +98,9 @@ target_sources($ENV{PLUGIN_NAME}
         src/interface/ParameterSlider.cpp
         src/audio/Gain.cpp
         src/audio/Flanger.cpp
+        src/audio/FreqShifter.cpp
+        src/audio/HilbertProcessor.cpp
+        src/audio/DryWet.cpp
         )
 
 #--------------------------------------------------------------------------------

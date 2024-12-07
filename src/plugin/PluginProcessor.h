@@ -5,6 +5,8 @@ class Gain;
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "../audio/Flanger.h"
+#include "../audio/FreqShifter.h"
+#include "../audio/DryWet.h"
 
 #include "PluginProcessorBase.h"
 
@@ -39,6 +41,8 @@ public:
     Flanger flanger4;
     Flanger flanger5;
     Flanger flanger6;
+    FreqShifter freqShifter;
+    DryWet dryWet;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
