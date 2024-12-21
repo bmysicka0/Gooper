@@ -68,7 +68,6 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     bool stereo = state->param_value(STEREO) != 0.0f;
     float spread = state->param_value(SPREAD);
     float goops = state->param_value(GOOPS);
-    float shepard = state->param_value(SHEPARD);
     float goopage = state->param_value(GOOPAGE);
     float mix = state->param_value(DRYWET) / 100.0f;
 
@@ -95,7 +94,9 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     if (goops >= 6) gain->process(buffer);
 
     freqShifter.setFrequency(goopage);
-    if (shepard >= 1) freqShifter.process(buffer);
+    // If goopage == 0, the freqShifter is not applied.
+    if (goopage != 0.0f)
+        freqShifter.process(buffer);
 
     dryWet.setMix(mix);
     dryWet.apply(dryBuffer, buffer);

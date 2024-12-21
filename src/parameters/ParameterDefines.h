@@ -6,7 +6,6 @@ enum PARAM {
 	RATE,
 	SPREAD,
 	STEREO,
-	SHEPARD,
 	GOOPAGE,
 	DRYWET,
 	TOTAL_NUMBER_PARAMETERS
@@ -17,7 +16,6 @@ static const std::array<juce::Identifier, PARAM::TOTAL_NUMBER_PARAMETERS> PARAME
 	"RATE",
 	"SPREAD",
 	"STEREO",
-	"SHEPARD",
 	"GOOPAGE",
 	"DRYWET",
 };
@@ -27,7 +25,6 @@ static const std::array<juce::String, PARAM::TOTAL_NUMBER_PARAMETERS> PARAMETER_
 	"RATE",
 	"SPREAD",
 	"STEREO",
-	"SHEPARD",
 	"GOOPAGE",
 	"DRYWET",
 };
@@ -37,8 +34,7 @@ static const std::array<juce::NormalisableRange<float>, PARAM::TOTAL_NUMBER_PARA
 	juce::NormalisableRange<float>(0.01f, 1.0f, 0.01f, 0.4f),
 	juce::NormalisableRange<float>(0.0f, 0.5f, 0.01f, 0.75f),
 	juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f, 1.0f),
-	juce::NormalisableRange<float>(0.0f, 1.0f, 1.0f, 1.0f),
-	juce::NormalisableRange<float>(-10.0f, 10.0f, 0.01f, 1.0f),
+	juce::NormalisableRange<float>(-8.0f, 8.0f, 0.01f, 1.0f),
 	juce::NormalisableRange<float>(0.0f, 100.0f, 1.0f, 1.0f),
 };
 static const std::array<float, PARAM::TOTAL_NUMBER_PARAMETERS> PARAMETER_DEFAULTS {
@@ -48,11 +44,9 @@ static const std::array<float, PARAM::TOTAL_NUMBER_PARAMETERS> PARAMETER_DEFAULT
 	0.0f,
 	0.0f,
 	0.0f,
-	0.0f,
 	50.0f,
 };
 static const std::array<bool, PARAM::TOTAL_NUMBER_PARAMETERS> PARAMETER_AUTOMATABLE {
-	true,
 	true,
 	true,
 	true,
@@ -67,7 +61,6 @@ static const std::array<juce::String, PARAM::TOTAL_NUMBER_PARAMETERS> PARAMETER_
 	"Rate",
 	"Spread",
 	"Stereo",
-	"Shepard",
 	"Goopage",
 	"DryWet",
 };
@@ -76,7 +69,6 @@ static const std::array<juce::String, PARAM::TOTAL_NUMBER_PARAMETERS> PARAMETER_
 	"",
 	"Hz",
 	"Hz",
-	"",
 	"",
 	"Hz",
 	"%",
@@ -87,7 +79,6 @@ static const std::array<juce::String, PARAM::TOTAL_NUMBER_PARAMETERS> PARAMETER_
 	"Rate Parameter",
 	"Spread Parameter",
 	"Stereo Parameter",
-	"Shepard Parameter",
 	"Goopage Parameter",
 	"DryWet Parameter",
 };
@@ -99,10 +90,6 @@ static const std::array<std::vector<juce::String>, PARAM::TOTAL_NUMBER_PARAMETER
 	std::vector<juce::String>{
 	},
 	std::vector<juce::String>{
-	},
-	std::vector<juce::String>{
-		"OFF",
-		"ON",
 	},
 	std::vector<juce::String>{
 		"OFF",

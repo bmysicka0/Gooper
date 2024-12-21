@@ -4,6 +4,5 @@ FEED, -0.95, 0.95, 0.01, 1, 0, 1, Feed, , Feed Parameter, ,
 RATE, 0.01, 1, 0.01, 0.4, 0.01, 1, Rate, Hz, Rate Parameter, ,
 SPREAD, 0, 0.5, 0.01, 0.75, 0, 1, Spread, Hz, Spread Parameter, ,
 STEREO, 0, 1, 1, 1, 0, 1, Stereo, , Stereo Parameter, "OFF" "ON"
-SHEPARD, 0, 1, 1, 1, 0, 1, Shepard, , Shepard Parameter, "OFF" "ON"
-GOOPAGE, -10.0, 10.0, 0.01, 1, 0.0, 1, Goopage, Hz, Goopage Parameter, ,
+GOOPAGE, -8.0, 8.0, 0.01, 1, 0.0, 1, Goopage, Hz, Goopage Parameter, ,
 DRYWET, 0, 100, 1, 1, 50, 1, DryWet, %, DryWet Parameter, ,

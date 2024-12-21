@@ -30,9 +30,6 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (PluginProcesso
     stereo_slider = std::make_unique<ParameterSlider>(state, PARAM::STEREO);
     addAndMakeVisible(*stereo_slider);
 
-    shepard_slider = std::make_unique<ParameterSlider>(state, PARAM::SHEPARD);
-    addAndMakeVisible(*shepard_slider);
-
     goopage_slider = std::make_unique<ParameterSlider>(state, PARAM::GOOPAGE);
     addAndMakeVisible(*goopage_slider);
 
@@ -87,10 +84,7 @@ void AudioPluginAudioProcessorEditor::resized()
     int stereo_slider_x = spread_slider_x + slider_size;
     stereo_slider->setBounds(stereo_slider_x, slider_y, slider_size, slider_size);
 
-    int shepard_slider_x = stereo_slider_x + slider_size;
-    shepard_slider->setBounds(shepard_slider_x, slider_y, slider_size, slider_size);
-
-    int goopage_slider_x = shepard_slider_x + slider_size;
+    int goopage_slider_x = stereo_slider_x + slider_size;
     goopage_slider->setBounds(goopage_slider_x, slider_y, slider_size, slider_size);
 
     int drywet_slider_x = goopage_slider_x + slider_size;
@@ -114,9 +108,6 @@ void AudioPluginAudioProcessorEditor::timerCallback() {
         }
         if (state->get_parameter_modified(PARAM::STEREO)) {
             stereo_slider->repaint();
-        }
-        if (state->get_parameter_modified(PARAM::SHEPARD)) {
-            shepard_slider->repaint();
         }
         if (state->get_parameter_modified(PARAM::GOOPAGE)) {
             goopage_slider->repaint();
